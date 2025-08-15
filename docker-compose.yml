@@ -3,7 +3,10 @@ version: "3.8"
 services:
   
   web-next:
-    build: Dockerfile
+    build:
+      context: ./
+      target: production
+      dockerfile: Dockerfile
     container_name: next-web
     volumes:
       - ./:src/app
@@ -17,5 +20,39 @@ services:
         - HOST=0.0.0.0
         - PORT=3000
         - NEXT_PUBLIC_BASE_URL=/
+        - DATABASE_HOST=mysql
+        - DATABASE_USER=root
+        - DATABASE_PASSWORD=root
+        - DATABASE_NAME=mysql-next
     stdin_open: true
     tty: true
+
+  mysql:
+    image: mysql
+    container_name: mysql-db-next
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=mysql-next
+      - MYSQL_HOST=user
+      - MYSQL_PASSWORD=root
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+  
+  phpMyAdmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpMyAdmin
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+
+volumes:
+  mysql_data:
